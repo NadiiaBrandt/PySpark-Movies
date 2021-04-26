@@ -23,9 +23,11 @@ if __name__ == "__main__":
         .where(rat.numVotes >= 100000)
     table.show(100)
 
-    Last10Y = table.filter(bas.startYear > 2010)
-    Last10Y.show(100)
+    last10Y = table.filter(bas.startYear > 2010)
+    last10Y.show(100)
 
-    In60Y = table.filter(bas.startYear.between(1959, 1970))
-    In60Y.show(100)
+    in60Y = table.filter(bas.startYear.between(1959, 1970))
+    in60Y.show(100)
+
+    table.write.csv("Output-1.csv")
     spark.stop()
