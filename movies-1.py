@@ -3,7 +3,7 @@ from pyspark.sql import functions as f
 
 if __name__ == "__main__":
     """
-        Usage: pi [partitions]
+       Counting top 100 movies
     """
 
     spark = SparkSession \
