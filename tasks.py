@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from Utilit import window, write_csv, read_df
+from Utilit import window, write_csv, read_df, inner_join
 
 from pyspark.sql import Window
 from pyspark.sql import functions as f
@@ -80,9 +80,9 @@ def top_actors(df):
     """
     The most demanded actors
     """
-    df = df.orderBy(f.col('averageRating').desc(), f.col('numVotes').desc())
-    df.inner_join(df, principals, "tconst")
-    df.inner_join(df, name_basics, "nconst").filter(f.col("category").like("act%"))
+    df.orderBy(f.col("averageRating").desc(), f.col("numVotes").desc())
+    df = inner_join(df, principals, "tconst").drop(principals.tconst)
+    df = inner_join(df, name_basics, "nconst").drop(name_basics.nconst).filter(f.col("category").like("act%"))
 
     return df \
         .groupby("nconst", "primaryName").count() \
@@ -95,9 +95,9 @@ def directors_top_films(df):
     Top 5 films by each director"s
     """
     df = df.orderBy(f.col('averageRating').desc(), f.col('numVotes').desc())
-    df.inner_join(df, crew, "tconst") \
+    df = inner_join(df, crew, "tconst") \
         .withColumn("director", f.explode(f.split("directors", ",")))
-    df.inner_join(df, name_basics, f.col("director") == f.col("nconst")) \
+    df = inner_join(df, name_basics, f.col("director") == f.col("nconst")) \
         .withColumn("film_rank", f.row_number().over(window("director")))
 
     return df.select("primaryName", "primaryTitle", "startYear", "averageRating", "numVotes") \
@@ -121,7 +121,7 @@ if __name__ == "__main__":
     name_basics = read_df(spark, "Datasets/name.basics.tsv")
     crew = read_df(spark, "Datasets/crew.tsv")
 
-    filter_join = basics.join(ratings, basics.tconst == ratings.tconst)
+    filter_join = basics.join(ratings, "tconst")
 
     write_csv(top_100(filter_join), "top_100")
     write_csv(top_in_last_10_years(filter_join), "top_in_last_10_years")
