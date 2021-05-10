@@ -80,6 +80,7 @@ def top_actors(df):
     """
     The most demanded actors
     """
+    df = df.orderBy(f.col('averageRating').desc(), f.col('numVotes').desc())
     df.inner_join(df, principals, "tconst")
     df.inner_join(df, name_basics, "nconst").filter(f.col("category").like("act%"))
 
@@ -93,7 +94,7 @@ def directors_top_films(df):
     """
     Top 5 films by each director"s
     """
-
+    df = df.orderBy(f.col('averageRating').desc(), f.col('numVotes').desc())
     df.inner_join(df, crew, "tconst") \
         .withColumn("director", f.explode(f.split("directors", ",")))
     df.inner_join(df, name_basics, f.col("director") == f.col("nconst")) \
@@ -120,7 +121,7 @@ if __name__ == "__main__":
     name_basics = read_df(spark, "Datasets/name.basics.tsv")
     crew = read_df(spark, "Datasets/crew.tsv")
 
-    filter_join = basics.join(ratings, f.col("tconst") == f.col("tconst"))
+    filter_join = basics.join(ratings, basics.tconst == ratings.tconst)
 
     write_csv(top_100(filter_join), "top_100")
     write_csv(top_in_last_10_years(filter_join), "top_in_last_10_years")
