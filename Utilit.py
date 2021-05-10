@@ -12,6 +12,9 @@ def window(column):
 
 
 def inner_join(left_df, right_df, condition, how="inner"):
+    """
+    To join Data Frames
+    """
     return left_df.join(right_df, condition, how)
 
 
@@ -22,3 +25,10 @@ def write_csv(data_frame, file_name):
     data_frame.coalesce(1).write \
         .option("header", True).mode("overwrite") \
         .save(f"outputs/{file_name}", format("csv"))
+
+
+def movie_filter():
+    """
+    Condition to find top films
+    """
+    filter((f.col("numVotes") >= 100000) & (f.col("titleType") == "movie"))
