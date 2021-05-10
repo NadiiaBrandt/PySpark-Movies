@@ -81,8 +81,8 @@ def top_actors(df):
     The most demanded actors
     """
     df.orderBy(f.col("averageRating").desc(), f.col("numVotes").desc())
-    df = inner_join(df, principals, "tconst").drop(principals.tconst)
-    df = inner_join(df, name_basics, "nconst").drop(name_basics.nconst).filter(f.col("category").like("act%"))
+    df = inner_join(df, principals, "tconst")
+    df = inner_join(df, name_basics, "nconst").filter(f.col("category").like("act%"))
 
     return df \
         .groupby("nconst", "primaryName").count() \
