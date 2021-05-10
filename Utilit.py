@@ -27,8 +27,12 @@ def write_csv(data_frame, file_name):
         .save(f"outputs/{file_name}", format("csv"))
 
 
-def movie_filter():
+def read_df(spark, path):
     """
-    Condition to find top films
+    Read dataframe
     """
-    filter((f.col("numVotes") >= 100000) & (f.col("titleType") == "movie"))
+    return spark.read.csv(path, sep=r"\t", header=True, inferSchema=True)
+
+
+def genres_explode(withColumn):
+    return withColumn("genres", f.explode(f.split(f.col("genres"), ",")))

@@ -1,16 +1,18 @@
 from datetime import datetime
 
-from Utilit import window, write_csv
+from Utilit import window, write_csv, read_df
 
 from pyspark.sql import Window
 from pyspark.sql import functions as f
 from pyspark.sql import SparkSession
+
 
 def top_100(df):
     """
     Top 100 films of all years
     """
     return df \
+        .filter((f.col("numVotes") >= 100000) & (f.col("titleType") == "movie")) \
         .select("tconst", "primaryTitle", "numVotes", "averageRating", "startYear") \
         .orderBy(f.col("averageRating").desc()) \
         .limit(100)
@@ -21,6 +23,7 @@ def top_in_last_10_years(df):
        Top 100 films in last 10 years
     """
     return df \
+        .filter((f.col("numVotes") >= 100000) & (f.col("titleType") == "movie")) \
         .filter(f.col("startYear") > datetime.now().year - 10) \
         .select("tconst", "primaryTitle", "numVotes", "averageRating", "startYear") \
         .orderBy(f.col("averageRating").desc()) \
@@ -32,6 +35,7 @@ def popular_in_60(df):
        Top 100 films in 60's
     """
     return df \
+        .filter((f.col("numVotes") >= 100000) & (f.col("titleType") == "movie")) \
         .filter(f.col("startYear").between(1960, 1969)) \
         .select("tconst", "primaryTitle", "numVotes", "averageRating", "startYear") \
         .orderBy(f.col("averageRating").desc()) \
@@ -110,11 +114,11 @@ if __name__ == "__main__":
         .appName("Movies") \
         .getOrCreate()
 
-    ratings = spark.read.csv("Datasets/ratings.tsv", sep=r"\t", header=True, inferSchema=True)
-    basics = spark.read.csv("Datasets/basics.tsv", sep=r"\t", header=True, inferSchema=True)
-    principals = spark.read.csv("Datasets/principals.tsv", sep=r"\t", header=True, inferSchema=True)
-    name_basics = spark.read.csv("Datasets/name.basics.tsv", sep=r"\t", header=True, inferSchema=True)
-    crew = spark.read.csv("Datasets/crew.tsv", sep=r"\t", header=True, inferSchema=True)
+    ratings = read_df(spark, "Datasets/ratings.tsv")
+    basics = read_df(spark, "Datasets/basics.tsv")
+    principals = read_df(spark, "Datasets/principals.tsv")
+    name_basics = read_df(spark, "Datasets/name.basics.tsv")
+    crew = read_df(spark, "Datasets/crew.tsv")
 
     filter_join = basics.join(ratings, f.col("tconst") == f.col("tconst"))
 
