@@ -34,5 +34,3 @@ def read_df(spark, path):
     return spark.read.csv(path, sep=r"\t", header=True, inferSchema=True)
 
 
-def genres_explode(withColumn):
-    return withColumn("genres", f.explode(f.split(f.col("genres"), ",")))
